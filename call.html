@@ -1,0 +1,2479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Call</title>
+
+<style>
+*{
+box-sizing:border-box;
+scrollbar-width:thin;
+scrollbar-color:var(--outline-color) var(--background-color)
+}
+
+:root{
+--background-color:#000;
+--text-color:#fff;
+--outline-color:green
+}
+
+html,body{
+margin:0;
+width:100%;
+height:100%;
+background:var(--background-color);
+color:var(--text-color);
+font-family:Arial,sans-serif;
+overflow:hidden
+}
+
+#app{
+width:100%;
+height:100%;
+display:flex;
+flex-direction:column;
+background:var(--background-color);
+color:var(--text-color)
+}
+
+#header{
+min-height:65px;
+height:65px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:10px 15px;
+background:var(--background-color);
+color:var(--text-color);
+border-bottom:2px solid var(--outline-color);
+flex-shrink:0
+}
+
+#callTitle{
+font-size:20px;
+font-weight:bold
+}
+
+#callInfo{
+margin-top:4px;
+color:var(--text-color);
+opacity:.7;
+font-size:12px
+}
+
+#status{
+color:var(--text-color);
+opacity:.8;
+font-size:14px;
+text-align:right
+}
+
+#mainArea{
+flex:1;
+min-height:0;
+width:100%;
+display:flex;
+overflow:hidden
+}
+
+#videoArea{
+flex:1;
+min-width:0;
+min-height:0;
+padding:10px;
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+grid-auto-rows:minmax(200px,1fr);
+gap:10px;
+background:var(--background-color);
+overflow-y:auto;
+overflow-x:hidden;
+align-content:center
+}
+
+.videoBox{
+position:relative;
+min-width:0;
+min-height:200px;
+background:var(--background-color);
+color:var(--text-color);
+border:2px solid var(--outline-color);
+border-radius:8px;
+overflow:hidden;
+display:flex;
+align-items:center;
+justify-content:center
+}
+
+.videoBox video{
+width:100%;
+height:100%;
+object-fit:contain;
+background:var(--background-color)
+}
+
+.videoLabel{
+position:absolute;
+left:10px;
+bottom:10px;
+padding:5px 9px;
+background:var(--background-color);
+color:var(--text-color);
+border:1px solid var(--outline-color);
+border-radius:6px;
+font-size:13px;
+z-index:2
+}
+
+.videoWaiting{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+color:var(--text-color);
+opacity:.7;
+text-align:center;
+font-size:15px;
+pointer-events:none
+}
+
+.remoteAudio{
+position:absolute;
+width:1px;
+height:1px;
+opacity:0;
+pointer-events:none
+}
+
+#chatPanel{
+width:320px;
+min-width:320px;
+height:100%;
+display:flex;
+flex-direction:column;
+background:var(--background-color);
+color:var(--text-color);
+border-left:2px solid var(--outline-color)
+}
+
+#chatPanel.hidden{
+display:none
+}
+
+#chatHeader{
+height:50px;
+min-height:50px;
+display:flex;
+align-items:center;
+justify-content:space-between;
+padding:0 12px;
+border-bottom:2px solid var(--outline-color);
+font-weight:bold
+}
+
+#chatTitle{
+font-size:16px
+}
+
+#closeChatButton{
+width:32px;
+height:32px;
+padding:0;
+background:var(--background-color);
+color:var(--text-color);
+border:2px solid var(--outline-color);
+border-radius:6px;
+cursor:pointer
+}
+
+#closeChatButton:hover{
+background:var(--outline-color);
+color:var(--background-color)
+}
+
+#chatMessages{
+flex:1;
+min-height:0;
+overflow-y:auto;
+padding:10px
+}
+
+.chatMessage{
+margin-bottom:10px;
+padding:7px 9px;
+background:var(--background-color);
+color:var(--text-color);
+border:1px solid var(--outline-color);
+border-radius:7px;
+overflow-wrap:anywhere
+}
+
+.chatSender{
+font-size:12px;
+font-weight:bold;
+margin-bottom:3px
+}
+
+.chatText{
+font-size:14px;
+white-space:pre-wrap
+}
+
+.chatTime{
+margin-top:3px;
+font-size:10px;
+opacity:.55
+}
+
+#chatInputArea{
+display:flex;
+gap:6px;
+padding:8px;
+border-top:2px solid var(--outline-color)
+}
+
+#chatInput{
+flex:1;
+min-width:0;
+height:38px;
+padding:0 9px;
+background:var(--background-color);
+color:var(--text-color);
+border:2px solid var(--outline-color);
+border-radius:7px;
+outline:none
+}
+
+#chatInput::placeholder{
+color:var(--text-color);
+opacity:.55
+}
+
+#sendChatButton{
+height:38px;
+padding:0 12px;
+background:var(--background-color);
+color:var(--text-color);
+border:2px solid var(--outline-color);
+border-radius:7px;
+cursor:pointer
+}
+
+#sendChatButton:hover{
+background:var(--outline-color);
+color:var(--background-color)
+}
+
+#controls{
+min-height:65px;
+height:65px;
+display:flex;
+justify-content:center;
+align-items:center;
+gap:10px;
+padding:10px;
+background:var(--background-color);
+color:var(--text-color);
+border-top:2px solid var(--outline-color);
+flex-shrink:0
+}
+
+#controls button{
+height:40px;
+padding:0 15px;
+background:var(--background-color);
+color:var(--text-color);
+border:2px solid var(--outline-color);
+border-radius:8px;
+cursor:pointer;
+font-size:14px
+}
+
+#controls button:hover:not(:disabled){
+background:var(--outline-color);
+color:var(--background-color)
+}
+
+#controls button:active:not(:disabled){
+transform:scale(.98)
+}
+
+#controls button:disabled{
+opacity:.4;
+cursor:not-allowed
+}
+
+#leaveButton{
+font-weight:bold
+}
+
+*::-webkit-scrollbar{
+width:8px;
+height:8px
+}
+
+*::-webkit-scrollbar-track{
+background:var(--background-color)
+}
+
+*::-webkit-scrollbar-thumb{
+background:var(--outline-color);
+border-radius:10px
+}
+
+*::-webkit-scrollbar-thumb:hover{
+background:var(--text-color)
+}
+
+@media(max-width:900px){
+#chatPanel{
+width:280px;
+min-width:280px
+}
+}
+
+@media(max-width:700px){
+#mainArea{
+position:relative
+}
+
+#videoArea{
+grid-template-columns:1fr;
+grid-auto-rows:minmax(220px,1fr)
+}
+
+#chatPanel{
+position:absolute;
+right:0;
+top:0;
+bottom:0;
+width:85%;
+max-width:340px;
+z-index:20;
+box-shadow:-5px 0 15px rgba(0,0,0,.3)
+}
+
+#controls{
+gap:5px
+}
+
+#controls button{
+padding:0 10px
+}
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+<div id="header">
+<div>
+<div id="callTitle">Call</div>
+<div id="callInfo">Loading...</div>
+</div>
+<div id="status">Starting...</div>
+</div>
+
+<div id="mainArea">
+
+<div id="videoArea">
+
+<div class="videoBox" id="localVideoBox">
+<video id="localVideo" autoplay playsinline muted></video>
+
+<div class="videoWaiting" id="localWaiting">
+Starting camera...
+</div>
+
+<div class="videoLabel">You</div>
+</div>
+
+</div>
+
+<div id="chatPanel">
+
+<div id="chatHeader">
+<div id="chatTitle">Call Chat</div>
+<button id="closeChatButton">×</button>
+</div>
+
+<div id="chatMessages"></div>
+
+<div id="chatInputArea">
+<input
+id="chatInput"
+type="text"
+maxlength="1000"
+placeholder="Message..."
+autocomplete="off"
+>
+<button id="sendChatButton">Send</button>
+</div>
+
+</div>
+
+</div>
+
+<div id="controls">
+<button id="micButton">Microphone</button>
+<button id="cameraButton">Camera</button>
+<button id="screenShareButton">Share Screen</button>
+<button id="chatButton">Chat</button>
+<button id="leaveButton">Leave Call</button>
+</div>
+
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+<script>
+
+const firebaseConfig={
+apiKey:"AIzaSyBAn20uJGpvsq0tI_vrh3mu_GamZj6DCI",
+authDomain:"global-chat-61d29.firebaseapp.com",
+databaseURL:"https://global-chat-61d29-default-rtdb.firebaseio.com",
+projectId:"global-chat-61d29",
+storageBucket:"global-chat-61d29.firebasestorage.app",
+messagingSenderId:"1002774370723",
+appId:"1:1002774370723:web:09c3d48abbccbec7b6e216",
+measurementId:"G-4Q42CLSPS3"
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db=firebase.database();
+const params=new URLSearchParams(location.search);
+
+const callId=params.get("callId");
+const userId=params.get("userId");
+const userName=params.get("userName")||"Anonymous";
+const callName=params.get("callName")||"Call";
+
+const videoArea=document.getElementById("videoArea");
+const localVideo=document.getElementById("localVideo");
+const localWaiting=document.getElementById("localWaiting");
+
+const callTitle=document.getElementById("callTitle");
+const callInfo=document.getElementById("callInfo");
+const status=document.getElementById("status");
+
+const micButton=document.getElementById("micButton");
+const cameraButton=document.getElementById("cameraButton");
+const screenShareButton=document.getElementById("screenShareButton");
+
+const chatButton=document.getElementById("chatButton");
+const leaveButton=document.getElementById("leaveButton");
+
+const chatPanel=document.getElementById("chatPanel");
+const closeChatButton=document.getElementById("closeChatButton");
+const chatMessages=document.getElementById("chatMessages");
+const chatInput=document.getElementById("chatInput");
+const sendChatButton=document.getElementById("sendChatButton");
+
+if(!callId||!userId){
+status.textContent="Missing call information.";
+throw new Error("callId or userId is missing.");
+}
+
+callTitle.textContent=callName;
+callInfo.textContent=userName;
+
+const activeCallRef=db.ref("activeCalls/"+callId);
+const usersRef=activeCallRef.child("users");
+const userRef=db.ref("users/"+userId);
+const callChatRef=db.ref("callChats/"+callId+"/messages");
+
+/* =========================================================
+   THEME
+   ========================================================= */
+
+function applyTheme(background,text,outline){
+
+if(background)
+document.documentElement.style.setProperty(
+"--background-color",background
+);
+
+if(text)
+document.documentElement.style.setProperty(
+"--text-color",text
+);
+
+if(outline)
+document.documentElement.style.setProperty(
+"--outline-color",outline
+);
+
+}
+
+async function loadUserTheme(){
+
+try{
+
+const snapshot=await userRef.once("value");
+const user=snapshot.val()||{};
+
+applyTheme(
+user.backgroundColor||user.backgroundcolor||user.background,
+user.textColor||user.textcolor||user.text,
+user.outlineColor||user.outlinecolor||user.outline
+);
+
+}catch(error){
+
+console.warn("Could not load user theme:",error);
+
+}
+
+}
+
+userRef.on("value",function(snapshot){
+
+const user=snapshot.val()||{};
+
+applyTheme(
+user.backgroundColor||user.backgroundcolor||user.background,
+user.textColor||user.textcolor||user.text,
+user.outlineColor||user.outlinecolor||user.outline
+);
+
+});
+
+loadUserTheme();
+
+/* =========================================================
+   WEBRTC STATE
+   ========================================================= */
+
+let localStream=new MediaStream();
+
+let microphoneEnabled=true;
+let cameraEnabled=true;
+
+let microphoneAvailable=false;
+let cameraAvailable=false;
+
+let screenShareStream=null;
+let screenSharing=false;
+
+let leaving=false;
+let isCreator=false;
+
+let usersListenerStarted=false;
+
+const peers={};
+
+const sessionId=
+(typeof crypto!=="undefined"&&
+crypto.randomUUID)?
+crypto.randomUUID():
+Date.now()+"_"+Math.random().toString(36).slice(2);
+
+const rtcConfiguration={
+iceServers:[
+{
+urls:"stun:stun.l.google.com:19302"
+},
+{
+urls:"stun:stun1.l.google.com:19302"
+},
+{
+urls:"turn:openrelay.metered.ca:80",
+username:"openrelayproject",
+credential:"openrelayproject"
+},
+{
+urls:"turn:openrelay.metered.ca:443",
+username:"openrelayproject",
+credential:"openrelayproject"
+},
+{
+urls:"turn:openrelay.metered.ca:443?transport=tcp",
+username:"openrelayproject",
+credential:"openrelayproject"
+}
+]
+};
+
+function setStatus(text){
+
+status.textContent=text;
+console.log("[CALL]",text);
+
+}
+
+/* =========================================================
+   LOCAL MEDIA DISPLAY
+   ========================================================= */
+
+function updateLocalMediaDisplay(){
+
+if(screenSharing&&screenShareStream){
+
+localVideo.srcObject=screenShareStream;
+localWaiting.style.display="none";
+return;
+
+}
+
+if(cameraAvailable){
+
+localVideo.srcObject=localStream;
+
+if(cameraEnabled){
+
+localWaiting.style.display="none";
+
+}else{
+
+localWaiting.textContent="Camera Off";
+localWaiting.style.display="block";
+
+}
+
+return;
+
+}
+
+localVideo.srcObject=null;
+
+if(microphoneAvailable){
+
+localWaiting.textContent="Audio only";
+
+}else{
+
+localWaiting.textContent="No camera or microphone";
+
+}
+
+localWaiting.style.display="block";
+
+}
+
+/* =========================================================
+   LOCAL MEDIA
+   ========================================================= */
+
+async function getLocalMedia(){
+
+setStatus("Checking camera and microphone...");
+
+localStream=new MediaStream();
+
+cameraAvailable=false;
+microphoneAvailable=false;
+
+try{
+
+const stream=
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:true
+});
+
+stream.getTracks().forEach(track=>{
+localStream.addTrack(track);
+});
+
+}catch(error){
+
+console.warn(
+"[CALL] Combined media request failed:",
+error
+);
+
+}
+
+if(!localStream.getVideoTracks().length){
+
+try{
+
+const stream=
+await navigator.mediaDevices.getUserMedia({
+video:true,
+audio:false
+});
+
+stream.getVideoTracks().forEach(track=>{
+localStream.addTrack(track);
+});
+
+}catch(error){
+
+console.warn(
+"[CALL] Camera unavailable:",
+error
+);
+
+}
+
+}
+
+if(!localStream.getAudioTracks().length){
+
+try{
+
+const stream=
+await navigator.mediaDevices.getUserMedia({
+video:false,
+audio:true
+});
+
+stream.getAudioTracks().forEach(track=>{
+localStream.addTrack(track);
+});
+
+}catch(error){
+
+console.warn(
+"[CALL] Microphone unavailable:",
+error
+);
+
+}
+
+}
+
+cameraAvailable=
+localStream.getVideoTracks().length>0;
+
+microphoneAvailable=
+localStream.getAudioTracks().length>0;
+
+cameraButton.disabled=!cameraAvailable;
+micButton.disabled=!microphoneAvailable;
+
+cameraButton.textContent=
+cameraAvailable?
+"Camera":
+"Camera Unavailable";
+
+micButton.textContent=
+microphoneAvailable?
+"Microphone":
+"Microphone Unavailable";
+
+updateLocalMediaDisplay();
+
+if(cameraAvailable&&microphoneAvailable){
+
+setStatus("Camera and microphone ready");
+
+}else if(cameraAvailable){
+
+setStatus("Camera ready • microphone unavailable");
+
+}else if(microphoneAvailable){
+
+setStatus("Microphone ready • camera unavailable");
+
+}else{
+
+setStatus("No camera or microphone • joining anyway");
+
+}
+
+}
+
+/* =========================================================
+   REMOTE BOXES
+   ========================================================= */
+
+function createRemoteVideoBox(id,name){
+
+if(!id||id===userId)return null;
+
+const boxId="video-"+id;
+
+let box=document.getElementById(boxId);
+
+if(box){
+
+const label=box.querySelector(".videoLabel");
+
+if(label&&name)
+label.textContent=name;
+
+return box;
+
+}
+
+box=document.createElement("div");
+
+box.className="videoBox";
+box.id=boxId;
+
+const video=document.createElement("video");
+
+video.autoplay=true;
+video.playsInline=true;
+video.controls=false;
+video.muted=true;
+
+const audio=document.createElement("audio");
+
+audio.autoplay=true;
+audio.playsInline=true;
+audio.className="remoteAudio";
+
+const waiting=document.createElement("div");
+
+waiting.className="videoWaiting";
+waiting.textContent="Waiting for media...";
+
+const label=document.createElement("div");
+
+label.className="videoLabel";
+label.textContent=name||"Remote user";
+
+box.appendChild(video);
+box.appendChild(audio);
+box.appendChild(waiting);
+box.appendChild(label);
+
+videoArea.appendChild(box);
+
+return box;
+
+}
+
+function removeRemoteVideoBox(id){
+
+if(!id)return;
+
+const box=document.getElementById("video-"+id);
+
+if(box)
+box.remove();
+
+}
+
+function updateRemoteDisplay(peer){
+
+if(!peer||!peer.remoteStream)
+return;
+
+const box=createRemoteVideoBox(
+peer.id,
+peer.name
+);
+
+if(!box)
+return;
+
+const video=box.querySelector("video");
+const audio=box.querySelector("audio");
+const waiting=box.querySelector(".videoWaiting");
+
+const videoTracks=
+peer.remoteStream
+.getVideoTracks()
+.filter(track=>track.readyState!=="ended");
+
+const audioTracks=
+peer.remoteStream
+.getAudioTracks()
+.filter(track=>track.readyState!=="ended");
+
+const hasVideo=videoTracks.length>0;
+const hasAudio=audioTracks.length>0;
+
+if(hasVideo){
+
+video.srcObject=peer.remoteStream;
+video.style.display="block";
+
+video.play().catch(()=>{});
+
+}else{
+
+video.srcObject=null;
+video.style.display="none";
+
+}
+
+if(hasAudio){
+
+audio.srcObject=peer.remoteStream;
+
+audio.play().catch(()=>{});
+
+}else{
+
+audio.srcObject=null;
+
+}
+
+if(hasVideo){
+
+waiting.style.display="none";
+
+}else if(hasAudio){
+
+waiting.textContent="Audio only";
+waiting.style.display="block";
+
+}else{
+
+waiting.textContent="Waiting for media...";
+waiting.style.display="block";
+
+}
+
+}
+
+/* =========================================================
+   PEER SIGNALING PATH
+   ========================================================= */
+
+function pairId(a,b){
+
+return [a,b].sort().join("__");
+
+}
+
+function pairRef(id){
+
+return db.ref(
+"calls/"+callId+"/peers/"+pairId(userId,id)
+);
+
+}
+
+function signalRef(id){
+
+return pairRef(id).child("signals");
+
+}
+
+/* =========================================================
+   SEND SIGNAL
+   ========================================================= */
+
+async function sendSignal(id,data){
+
+if(leaving)return;
+
+try{
+
+await signalRef(id).push({
+...data,
+from:userId,
+session:sessionId,
+timestamp:firebase.database.ServerValue.TIMESTAMP
+});
+
+}catch(error){
+
+console.error(
+"[CALL] Signal send error:",
+error
+);
+
+}
+
+}
+
+/* =========================================================
+   PEER CONNECTION
+   ========================================================= */
+
+function createPeer(id,name){
+
+if(!id||id===userId)
+return null;
+
+if(peers[id])
+return peers[id];
+
+console.log(
+"[CALL] Creating peer connection for:",
+id,
+name
+);
+
+const pc=new RTCPeerConnection(
+rtcConfiguration
+);
+
+const peer={
+id:id,
+name:name||"Remote user",
+pc:pc,
+remoteStream:new MediaStream(),
+audioTransceiver:null,
+videoTransceiver:null,
+audioSender:null,
+videoSender:null,
+pendingCandidates:[],
+makingOffer:false,
+ignoreOffer:false,
+isSettingRemoteAnswerPending:false,
+polite:userId>id,
+signalListener:null
+};
+
+peers[id]=peer;
+
+createRemoteVideoBox(
+id,
+peer.name
+);
+
+/* ---------------------------------------------------------
+   LOCAL AUDIO
+   --------------------------------------------------------- */
+
+const audioTrack=
+localStream.getAudioTracks()[0]||null;
+
+if(audioTrack){
+
+peer.audioTransceiver=
+pc.addTransceiver(
+audioTrack,
+{
+direction:"sendrecv",
+streams:[localStream]
+}
+);
+
+}else{
+
+peer.audioTransceiver=
+pc.addTransceiver(
+"audio",
+{
+direction:"recvonly"
+}
+);
+
+}
+
+peer.audioSender=
+peer.audioTransceiver.sender;
+
+/* ---------------------------------------------------------
+   LOCAL VIDEO
+   --------------------------------------------------------- */
+
+const videoTrack=
+localStream.getVideoTracks()[0]||null;
+
+if(videoTrack){
+
+peer.videoTransceiver=
+pc.addTransceiver(
+videoTrack,
+{
+direction:"sendrecv",
+streams:[localStream]
+}
+);
+
+}else{
+
+peer.videoTransceiver=
+pc.addTransceiver(
+"video",
+{
+direction:"recvonly"
+}
+);
+
+}
+
+peer.videoSender=
+peer.videoTransceiver.sender;
+
+/* ---------------------------------------------------------
+   ICE
+   --------------------------------------------------------- */
+
+pc.onicecandidate=function(event){
+
+if(!event.candidate)
+return;
+
+sendSignal(
+id,
+{
+type:"candidate",
+candidate:event.candidate.toJSON()
+}
+);
+
+};
+
+/* ---------------------------------------------------------
+   REMOTE TRACK
+   --------------------------------------------------------- */
+
+pc.ontrack=function(event){
+
+console.log(
+"[CALL] Remote track from",
+id,
+event.track.kind,
+event.track.id
+);
+
+if(event.streams&&event.streams.length){
+
+const stream=event.streams[0];
+
+stream.getTracks().forEach(track=>{
+
+if(
+!peer.remoteStream
+.getTracks()
+.some(existing=>existing.id===track.id)
+){
+
+peer.remoteStream.addTrack(track);
+
+}
+
+});
+
+}else if(
+!peer.remoteStream
+.getTracks()
+.some(track=>track.id===event.track.id)
+){
+
+peer.remoteStream.addTrack(event.track);
+
+}
+
+event.track.onunmute=function(){
+
+updateRemoteDisplay(peer);
+
+};
+
+event.track.onmute=function(){
+
+updateRemoteDisplay(peer);
+
+};
+
+event.track.onended=function(){
+
+updateRemoteDisplay(peer);
+
+};
+
+updateRemoteDisplay(peer);
+
+};
+
+/* ---------------------------------------------------------
+   CONNECTION STATE
+   --------------------------------------------------------- */
+
+pc.onconnectionstatechange=function(){
+
+console.log(
+"[CALL] Peer",
+id,
+"connection:",
+pc.connectionState
+);
+
+if(pc.connectionState==="connected"){
+
+updateOverallStatus();
+
+}else if(pc.connectionState==="failed"){
+
+console.warn(
+"[CALL] Peer connection failed:",
+id
+);
+
+updateOverallStatus();
+
+}else if(pc.connectionState==="disconnected"){
+
+updateOverallStatus();
+
+}
+
+};
+
+/* ---------------------------------------------------------
+   ICE STATE
+   --------------------------------------------------------- */
+
+pc.oniceconnectionstatechange=function(){
+
+console.log(
+"[CALL] Peer",
+id,
+"ICE:",
+pc.iceConnectionState
+);
+
+};
+
+/* ---------------------------------------------------------
+   SIGNALING STATE
+   --------------------------------------------------------- */
+
+pc.onsignalingstatechange=function(){
+
+console.log(
+"[CALL] Peer",
+id,
+"signaling:",
+pc.signalingState
+);
+
+};
+
+/* ---------------------------------------------------------
+   PERFECT NEGOTIATION
+   --------------------------------------------------------- */
+
+pc.onnegotiationneeded=async function(){
+
+try{
+
+peer.makingOffer=true;
+
+await pc.setLocalDescription();
+
+if(pc.localDescription){
+
+await sendSignal(
+id,
+{
+type:"description",
+description:pc.localDescription.toJSON()
+}
+);
+
+}
+
+}catch(error){
+
+console.error(
+"[CALL] Negotiation error with",
+id,
+error
+);
+
+}finally{
+
+peer.makingOffer=false;
+
+}
+
+};
+
+/* ---------------------------------------------------------
+   SIGNAL LISTENER
+   --------------------------------------------------------- */
+
+peer.signalListener=
+signalRef(id).on(
+"child_added",
+async function(snapshot){
+
+const message=snapshot.val();
+
+if(!message)
+return;
+
+/*
+ Ignore our own signals.
+ */
+
+if(message.from===userId)
+return;
+
+/*
+ Ignore old sessions from the same user.
+ This prevents stale offers/candidates from
+ previous page sessions from corrupting a call.
+ */
+
+try{
+
+const currentUserSnapshot=
+await usersRef
+.child(message.from)
+.once("value");
+
+const currentUser=
+currentUserSnapshot.val();
+
+if(
+!currentUser||
+currentUser.session!==message.session
+){
+
+return;
+
+}
+
+}catch(error){
+
+console.warn(
+"[CALL] Could not validate signal session:",
+error
+);
+
+return;
+
+}
+
+try{
+
+if(message.type==="candidate"){
+
+if(
+peer.ignoreOffer
+){
+
+return;
+
+}
+
+const candidate=
+new RTCIceCandidate(
+message.candidate
+);
+
+if(
+pc.remoteDescription
+){
+
+await pc.addIceCandidate(
+candidate
+);
+
+}else{
+
+peer.pendingCandidates.push(
+candidate
+);
+
+}
+
+return;
+
+}
+
+if(message.type!=="description")
+return;
+
+const description=
+message.description;
+
+if(!description)
+return;
+
+/*
+ Perfect negotiation collision handling.
+ */
+
+const readyForOffer=
+!peer.makingOffer&&
+(
+pc.signalingState==="stable"||
+peer.isSettingRemoteAnswerPending
+);
+
+const offerCollision=
+description.type==="offer"&&
+!readyForOffer;
+
+peer.ignoreOffer=
+!peer.polite&&
+offerCollision;
+
+if(peer.ignoreOffer){
+
+console.log(
+"[CALL] Ignoring colliding offer from",
+id
+);
+
+return;
+
+}
+
+/*
+ If we are polite and an offer collides with
+ our own offer, roll our offer back.
+ */
+
+if(
+offerCollision&&
+pc.signalingState!=="stable"
+){
+
+try{
+
+await pc.setLocalDescription({
+type:"rollback"
+});
+
+}catch(error){
+
+console.warn(
+"[CALL] Rollback failed:",
+error
+);
+
+}
+
+}
+
+peer.isSettingRemoteAnswerPending=
+description.type==="answer";
+
+await pc.setRemoteDescription(
+new RTCSessionDescription(description)
+);
+
+peer.isSettingRemoteAnswerPending=false;
+
+/*
+ Apply ICE that arrived before the description.
+ */
+
+while(
+peer.pendingCandidates.length
+){
+
+const candidate=
+peer.pendingCandidates.shift();
+
+try{
+
+await pc.addIceCandidate(
+candidate
+);
+
+}catch(error){
+
+console.warn(
+"[CALL] Pending ICE error:",
+error
+);
+
+}
+
+}
+
+/*
+ If this is an offer, automatically create
+ the answer.
+ */
+
+if(description.type==="offer"){
+
+await pc.setLocalDescription();
+
+if(pc.localDescription){
+
+await sendSignal(
+id,
+{
+type:"description",
+description:pc.localDescription.toJSON()
+}
+);
+
+}
+
+}
+
+updateRemoteDisplay(peer);
+
+}catch(error){
+
+console.error(
+"[CALL] Signal handling error from",
+id,
+error
+);
+
+}
+
+}
+);
+
+return peer;
+
+}
+
+/* =========================================================
+   OVERALL STATUS
+   ========================================================= */
+
+function updateOverallStatus(){
+
+const ids=Object.keys(peers);
+
+if(!ids.length){
+
+if(!leaving)
+setStatus("Waiting for someone to join...");
+
+return;
+
+}
+
+const connected=
+ids.filter(id=>
+peers[id]&&
+peers[id].pc.connectionState==="connected"
+).length;
+
+const connecting=
+ids.filter(id=>
+peers[id]&&
+(
+peers[id].pc.connectionState==="connecting"||
+peers[id].pc.iceConnectionState==="checking"
+)
+).length;
+
+if(connected===ids.length){
+
+setStatus(
+"Connected • "+connected+
+(ids.length===1?" participant":" participants")
+);
+
+}else if(connected>0){
+
+setStatus(
+"Connected to "+connected+
+" of "+ids.length
+);
+
+}else if(connecting>0){
+
+setStatus("Connecting...");
+
+}else{
+
+setStatus("Connecting...");
+
+}
+
+}
+
+/* =========================================================
+   CLOSE PEER
+   ========================================================= */
+
+function closePeer(id){
+
+const peer=peers[id];
+
+if(!peer)
+return;
+
+console.log(
+"[CALL] Closing peer:",
+id
+);
+
+if(
+peer.signalListener
+){
+
+signalRef(id).off(
+"child_added",
+peer.signalListener
+);
+
+}
+
+try{
+
+peer.pc.close();
+
+}catch(error){}
+
+removeRemoteVideoBox(id);
+
+delete peers[id];
+
+updateOverallStatus();
+
+}
+
+/* =========================================================
+   USER LIST
+   ========================================================= */
+
+async function handleUsersSnapshot(snapshot){
+
+if(leaving)
+return;
+
+const users=snapshot.val()||{};
+
+const ids=Object.keys(users);
+
+console.log(
+"[CALL] Current participants:",
+ids
+);
+
+/*
+ Create a peer connection for EVERY other user.
+ */
+
+for(const id of ids){
+
+if(id===userId)
+continue;
+
+const data=users[id]||{};
+
+createRemoteVideoBox(
+id,
+data.name||"Remote user"
+);
+
+if(!peers[id]){
+
+createPeer(
+id,
+data.name||"Remote user"
+);
+
+}else{
+
+peers[id].name=
+data.name||peers[id].name;
+
+const box=document.getElementById(
+"video-"+id
+);
+
+if(box){
+
+const label=
+box.querySelector(".videoLabel");
+
+if(label)
+label.textContent=peers[id].name;
+
+}
+
+}
+
+}
+
+/*
+ Remove peers whose users disappeared.
+ */
+
+Object.keys(peers).forEach(id=>{
+
+if(!users[id]){
+
+closePeer(id);
+
+}
+
+});
+
+updateOverallStatus();
+
+}
+
+/* =========================================================
+   START PARTICIPANT WATCHER
+   ========================================================= */
+
+function startUsersWatcher(){
+
+if(usersListenerStarted)
+return;
+
+usersListenerStarted=true;
+
+usersRef.on(
+"value",
+handleUsersSnapshot
+);
+
+}
+
+/* =========================================================
+   SCREEN SHARE
+   ========================================================= */
+
+async function startScreenShare(){
+
+if(!Object.keys(peers).length){
+
+setStatus(
+"You are not connected yet."
+);
+
+return;
+
+}
+
+if(screenSharing){
+
+await stopScreenShare();
+return;
+
+}
+
+try{
+
+screenShareStream=
+await navigator.mediaDevices.getDisplayMedia({
+video:true,
+audio:false
+});
+
+const screenTrack=
+screenShareStream.getVideoTracks()[0];
+
+if(!screenTrack){
+
+throw new Error(
+"No screen track."
+);
+
+}
+
+/*
+ Replace the video track separately on
+ EVERY peer connection.
+ */
+
+for(const id of Object.keys(peers)){
+
+const peer=peers[id];
+
+if(!peer||peer.pc.connectionState==="closed")
+continue;
+
+if(!peer.videoTransceiver){
+
+peer.videoTransceiver=
+peer.pc.addTransceiver(
+"video",
+{
+direction:"recvonly"
+}
+);
+
+peer.videoSender=
+peer.videoTransceiver.sender;
+
+}
+
+await peer.videoSender.replaceTrack(
+screenTrack
+);
+
+peer.videoTransceiver.direction=
+"sendrecv";
+
+}
+
+/*
+ The transceiver changes trigger
+ negotiationneeded for each peer.
+ */
+
+screenSharing=true;
+
+screenShareButton.textContent=
+"Stop Sharing";
+
+localVideo.srcObject=
+screenShareStream;
+
+localWaiting.style.display=
+"none";
+
+setStatus(
+"Sharing screen"
+);
+
+screenTrack.onended=
+async function(){
+
+if(screenSharing){
+
+await stopScreenShare();
+
+}
+
+};
+
+}catch(error){
+
+console.error(
+"[CALL] Screen sharing error:",
+error
+);
+
+if(screenShareStream){
+
+screenShareStream
+.getTracks()
+.forEach(track=>track.stop());
+
+}
+
+screenShareStream=null;
+screenSharing=false;
+
+screenShareButton.textContent=
+"Share Screen";
+
+if(error.name==="NotAllowedError"){
+
+setStatus(
+"Screen sharing cancelled."
+);
+
+}else{
+
+setStatus(
+"Screen sharing failed."
+);
+
+}
+
+}
+
+}
+
+async function stopScreenShare(){
+
+if(!screenSharing)
+return;
+
+try{
+
+const cameraTrack=
+localStream.getVideoTracks()[0]||null;
+
+for(const id of Object.keys(peers)){
+
+const peer=peers[id];
+
+if(!peer)
+continue;
+
+if(peer.videoSender){
+
+await peer.videoSender.replaceTrack(
+cameraTrack
+);
+
+}
+
+if(peer.videoTransceiver){
+
+peer.videoTransceiver.direction=
+cameraTrack?
+"sendrecv":
+"recvonly";
+
+}
+
+}
+
+if(screenShareStream){
+
+screenShareStream
+.getTracks()
+.forEach(track=>track.stop());
+
+}
+
+screenShareStream=null;
+screenSharing=false;
+
+screenShareButton.textContent=
+"Share Screen";
+
+updateLocalMediaDisplay();
+
+setStatus(
+cameraTrack?
+"Camera restored":
+"Screen sharing stopped"
+);
+
+}catch(error){
+
+console.error(
+"[CALL] Stop screen share error:",
+error
+);
+
+setStatus(
+"Could not stop screen sharing."
+);
+
+}
+
+}
+
+screenShareButton.addEventListener(
+"click",
+async function(){
+
+if(screenSharing){
+
+await stopScreenShare();
+
+}else{
+
+await startScreenShare();
+
+}
+
+});
+
+/* =========================================================
+   CHAT
+   ========================================================= */
+
+function addChatMessage(id,message){
+
+if(
+document.getElementById("chat-"+id)
+)
+return;
+
+const wrapper=
+document.createElement("div");
+
+wrapper.className=
+"chatMessage";
+
+wrapper.id=
+"chat-"+id;
+
+const sender=
+document.createElement("div");
+
+sender.className=
+"chatSender";
+
+sender.textContent=
+message.userName||
+"Anonymous";
+
+const text=
+document.createElement("div");
+
+text.className=
+"chatText";
+
+text.textContent=
+message.text||
+"";
+
+const time=
+document.createElement("div");
+
+time.className=
+"chatTime";
+
+if(message.timestamp){
+
+time.textContent=
+new Date(
+message.timestamp
+).toLocaleTimeString(
+[],
+{
+hour:"numeric",
+minute:"2-digit"
+}
+);
+
+}
+
+wrapper.appendChild(sender);
+wrapper.appendChild(text);
+wrapper.appendChild(time);
+
+chatMessages.appendChild(wrapper);
+
+chatMessages.scrollTop=
+chatMessages.scrollHeight;
+
+}
+
+callChatRef.on(
+"child_added",
+function(snapshot){
+
+const message=snapshot.val();
+
+if(!message)
+return;
+
+addChatMessage(
+snapshot.key,
+message
+);
+
+}
+);
+
+async function sendChatMessage(){
+
+const text=
+chatInput.value.trim();
+
+if(!text||leaving)
+return;
+
+try{
+
+await callChatRef.push({
+
+userId:userId,
+userName:userName,
+text:text,
+timestamp:
+firebase.database.ServerValue.TIMESTAMP
+
+});
+
+chatInput.value="";
+chatInput.focus();
+
+}catch(error){
+
+console.error(
+"Chat send error:",
+error
+);
+
+}
+
+}
+
+sendChatButton.addEventListener(
+"click",
+sendChatMessage
+);
+
+chatInput.addEventListener(
+"keydown",
+function(event){
+
+if(event.key==="Enter"){
+
+event.preventDefault();
+
+sendChatMessage();
+
+}
+
+});
+
+chatButton.addEventListener(
+"click",
+function(){
+
+chatPanel.classList.remove(
+"hidden"
+);
+
+chatInput.focus();
+
+});
+
+closeChatButton.addEventListener(
+"click",
+function(){
+
+chatPanel.classList.add(
+"hidden"
+);
+
+});
+
+/* =========================================================
+   CALL WATCHER
+   ========================================================= */
+
+activeCallRef.on(
+"value",
+function(snapshot){
+
+if(leaving)
+return;
+
+if(!snapshot.exists()){
+
+setStatus(
+"Call ended."
+);
+
+chatInput.disabled=true;
+sendChatButton.disabled=true;
+screenShareButton.disabled=true;
+
+if(screenShareStream){
+
+screenShareStream
+.getTracks()
+.forEach(track=>track.stop());
+
+screenShareStream=null;
+screenSharing=false;
+
+}
+
+if(localStream){
+
+localStream
+.getTracks()
+.forEach(track=>track.stop());
+
+}
+
+Object.keys(peers).forEach(
+closePeer
+);
+
+return;
+
+}
+
+const call=snapshot.val();
+
+if(
+call&&
+call.active===false
+){
+
+setStatus(
+"Call ended."
+);
+
+}
+
+});
+
+/* =========================================================
+   START CALL
+   ========================================================= */
+
+async function startCall(){
+
+setStatus("Loading call...");
+
+try{
+
+const snapshot=
+await activeCallRef.once("value");
+
+const call=
+snapshot.val();
+
+if(!call){
+
+setStatus("Call does not exist.");
+return;
+
+}
+
+isCreator=
+call.creatorId===userId;
+
+/*
+ Get local hardware BEFORE creating the
+ peer connections.
+ */
+
+await getLocalMedia();
+
+/*
+ Register this browser session.
+ The session ID prevents old Firebase
+ signaling messages from being reused.
+ */
+
+await usersRef
+.child(userId)
+.set({
+id:userId,
+name:userName,
+session:sessionId
+});
+
+usersRef
+.child(userId)
+.onDisconnect()
+.remove();
+
+/*
+ Start watching the entire participant list.
+
+ Every participant uses the exact same
+ multi-peer system. There is no longer a
+ special creator/callee WebRTC path.
+ */
+
+startUsersWatcher();
+
+if(isCreator){
+
+setStatus(
+"Waiting for someone to join..."
+);
+
+}else{
+
+setStatus(
+"Joining call..."
+);
+
+}
+
+}catch(error){
+
+console.error(
+"[CALL] Startup error:",
+error
+);
+
+setStatus(
+"Error starting call."
+);
+
+}
+
+}
+
+/* =========================================================
+   MICROPHONE
+   ========================================================= */
+
+micButton.addEventListener(
+"click",
+function(){
+
+if(!microphoneAvailable)
+return;
+
+const tracks=
+localStream.getAudioTracks();
+
+if(!tracks.length)
+return;
+
+microphoneEnabled=
+!microphoneEnabled;
+
+tracks.forEach(track=>{
+track.enabled=
+microphoneEnabled;
+});
+
+micButton.textContent=
+microphoneEnabled?
+"Microphone":
+"Microphone Off";
+
+});
+
+/* =========================================================
+   CAMERA
+   ========================================================= */
+
+cameraButton.addEventListener(
+"click",
+function(){
+
+if(!cameraAvailable)
+return;
+
+const tracks=
+localStream.getVideoTracks();
+
+if(!tracks.length)
+return;
+
+cameraEnabled=
+!cameraEnabled;
+
+tracks.forEach(track=>{
+track.enabled=
+cameraEnabled;
+});
+
+cameraButton.textContent=
+cameraEnabled?
+"Camera":
+"Camera Off";
+
+updateLocalMediaDisplay();
+
+});
+
+/* =========================================================
+   LEAVE
+   ========================================================= */
+
+async function leaveCall(){
+
+if(leaving)
+return;
+
+leaving=true;
+
+setStatus(
+"Leaving call..."
+);
+
+if(screenShareStream){
+
+screenShareStream
+.getTracks()
+.forEach(track=>track.stop());
+
+screenShareStream=null;
+screenSharing=false;
+
+}
+
+if(localStream){
+
+localStream
+.getTracks()
+.forEach(track=>track.stop());
+
+}
+
+Object.keys(peers).forEach(
+closePeer
+);
+
+try{
+
+await usersRef
+.child(userId)
+.remove();
+
+}catch(error){
+
+console.error(
+"[CALL] User removal error:",
+error
+);
+
+}
+
+/*
+ Only the creator destroys the entire
+ call and chat.
+ */
+
+if(isCreator){
+
+try{
+
+await Promise.all([
+
+activeCallRef.remove(),
+
+db.ref(
+"callChats/"+callId
+).remove()
+
+]);
+
+}catch(error){
+
+console.error(
+"[CALL] Cleanup error:",
+error
+);
+
+}
+
+}
+
+setStatus(
+"Call ended."
+);
+
+}
+
+leaveButton.addEventListener(
+"click",
+leaveCall
+);
+
+/* =========================================================
+   PAGE CLOSE
+   ========================================================= */
+
+window.addEventListener(
+"beforeunload",
+function(){
+
+if(screenShareStream){
+
+screenShareStream
+.getTracks()
+.forEach(track=>track.stop());
+
+}
+
+if(localStream){
+
+localStream
+.getTracks()
+.forEach(track=>track.stop());
+
+}
+
+Object.keys(peers).forEach(id=>{
+
+try{
+
+if(peers[id]&&peers[id].pc)
+peers[id].pc.close();
+
+}catch(error){}
+
+});
+
+});
+
+/* =========================================================
+   START
+   ========================================================= */
+
+startCall();
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="robots" content="noindex">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Chat Room</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+
+<!-- =======================================================
+     FIREBASE SDK
+     ======================================================= -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+
+<!-- =======================================================
+     NAME SETUP
+     ======================================================= -->
+
+<div id="nameSetup">
+
+    <div id="nameSetupBox">
+
+        <div id="nameSetupTitle">
+            Enter your name
+        </div>
+
+        <input
+            id="nameSetupInput"
+            placeholder="Your name"
+            maxlength="30"
+        >
+
+        <button
+            type="button"
+            id="nameSetupButton"
+        >
+            Continue
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     GLOBAL CHAT
+     ======================================================= -->
+
+<div id="chatContainer">
+
+    <div id="messages"></div>
+
+    <div id="inputArea">
+
+        <input
+            id="name"
+            placeholder="Name"
+            readonly
+        >
+
+        <input
+            id="message"
+            placeholder="Type message..."
+        >
+
+        <button
+            type="button"
+            id="sendMessage"
+        >
+            Send
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     SETTINGS
+     ======================================================= -->
+
+<div id="settingscontainer">
+
+    <div class="settingscontainer">
+
+        <div id="settingsTabs">
+
+            <button
+                type="button"
+                id="generalSettingsTab"
+                class="settingsTab active"
+            >
+                General
+            </button>
+
+            <button
+                type="button"
+                id="profileSettingsTab"
+                class="settingsTab"
+            >
+                Profile
+            </button>
+
+        </div>
+
+
+        <!-- =========================
+             GENERAL SETTINGS
+             ========================= -->
+
+        <div
+            id="generalSettingsPanel"
+            class="settingsPanel"
+        >
+
+            <select id="outlinecolor">
+
+                <option value="green">
+                    Green
+                </option>
+
+                <option value="red">
+                    Red
+                </option>
+
+                <option value="blue">
+                    Blue
+                </option>
+
+                <option value="yellow">
+                    Yellow
+                </option>
+
+                <option value="white">
+                    White
+                </option>
+
+                <option value="purple">
+                    Purple
+                </option>
+
+            </select>
+
+
+            <select id="textcolor">
+
+                <option value="white">
+                    White
+                </option>
+
+                <option value="red">
+                    Red
+                </option>
+
+                <option value="blue">
+                    Blue
+                </option>
+
+                <option value="green">
+                    Green
+                </option>
+
+                <option value="yellow">
+                    Yellow
+                </option>
+
+                <option value="purple">
+                    Purple
+                </option>
+
+            </select>
+
+
+            <select id="backgroundcolor">
+
+                <option value="white">
+                    White
+                </option>
+
+                <option value="red">
+                    Red
+                </option>
+
+                <option value="blue">
+                    Blue
+                </option>
+
+                <option value="green">
+                    Green
+                </option>
+
+                <option value="yellow">
+                    Yellow
+                </option>
+
+                <option value="purple">
+                    Purple
+                </option>
+
+            </select>
+
+
+            <div id="userid-display">
+
+                Your User ID:
+
+                <span id="userid"></span>
+
+            </div>
+
+        </div>
+
+
+        <!-- =========================
+             PROFILE SETTINGS
+             ========================= -->
+
+        <div
+            id="profileSettingsPanel"
+            class="settingsPanel"
+            style="display: none;"
+        >
+
+            <div id="profilePictureSection">
+
+                <div id="profilePicturePreview">
+                    No Profile Picture
+                </div>
+
+                <input
+                    type="file"
+                    id="profilePictureInput"
+                    accept="image/*"
+                    style="display: none;"
+                >
+
+                <div id="profilePictureButtons">
+
+                    <button
+                        type="button"
+                        id="profilePictureButton"
+                        class="profileButton"
+                    >
+                        Choose Profile Picture
+                    </button>
+
+                    <button
+                        type="button"
+                        id="removeProfilePictureButton"
+                        class="profileButton"
+                    >
+                        Remove Profile Picture
+                    </button>
+
+                </div>
+
+            </div>
+
+
+            <div id="profileNameSection">
+
+                <div id="profileNameTitle">
+                    Name
+                </div>
+
+                <input
+                    type="text"
+                    id="profileNameInput"
+                    maxlength="30"
+                    placeholder="Your name"
+                >
+
+                <button
+                    type="button"
+                    id="saveProfileNameButton"
+                    class="profileButton"
+                >
+                    Save Name
+                </button>
+
+            </div>
+
+
+            <div id="profileDescriptionSection">
+
+                <div id="profileDescriptionTitle">
+                    Profile Description
+                </div>
+
+                <textarea
+                    id="profileDescriptionInput"
+                    maxlength="300"
+                    placeholder="Tell people a little about yourself..."
+                ></textarea>
+
+                <div id="profileDescriptionCounter">
+                    0 / 300
+                </div>
+
+                <button
+                    type="button"
+                    id="saveProfileDescriptionButton"
+                    class="profileButton"
+                >
+                    Save Description
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <button
+            type="button"
+            id="closesettings"
+            class="closesettings"
+        >
+            close
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     SETTINGS BUTTON
+     ======================================================= -->
+
+<div id="setting">
+
+    <button
+        type="button"
+        id="settings-button"
+    >
+        settings
+    </button>
+
+</div>
+
+
+<!-- =======================================================
+     PRIVATE MESSAGE BUTTON
+     ======================================================= -->
+
+<button
+    type="button"
+    id="private-button"
+>
+    Private Messages
+</button>
+
+
+<!-- =======================================================
+     GAMES BUTTON
+     ======================================================= -->
+
+<button
+    type="button"
+    id="games-button"
+>
+    Games
+</button>
+
+
+<!-- =======================================================
+     GAMES SYSTEM
+     ======================================================= -->
+
+<div id="gamesSystem">
+
+    <div id="gamesWindow">
+
+        <!-- =================================================
+             GAMES PAGE
+             ================================================= -->
+
+        <div id="gamesPage">
+
+            <div id="gamesPageHeader">
+
+                <div id="gamesPageTitle">
+                    Games
+                </div>
+
+                <button
+                    type="button"
+                    id="closeGames"
+                >
+                    Close
+                </button>
+
+            </div>
+
+
+            <div id="gamesControls">
+
+                <select id="gamesCategory">
+
+                    <option value="all">
+                        All Games
+                    </option>
+
+                    <option value="arcade">
+                        Arcade
+                    </option>
+
+                    <option value="action">
+                        Action
+                    </option>
+
+                    <option value="puzzle">
+                        Puzzle
+                    </option>
+
+                    <option value="racing">
+                        Racing
+                    </option>
+
+                    <option value="sports">
+                        Sports
+                    </option>
+
+                    <option value="strategy">
+                        Strategy
+                    </option>
+
+                    <option value="shooter">
+                        Shooter
+                    </option>
+
+                </select>
+
+
+                <button
+                    type="button"
+                    id="browseAllGames"
+                >
+                    Browse All
+                </button>
+
+            </div>
+
+
+            <div id="gamesGrid"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     SIDEBAR
+     ======================================================= -->
+
+<button
+    type="button"
+    id="sidebarToggle"
+>
+    ☰
+</button>
+
+
+<div id="sidebarOverlay"></div>
+
+
+<div id="sidebar">
+
+    <div id="sidebarTitle">
+        Menu
+    </div>
+
+
+    <button
+        type="button"
+        id="messageRequestsButton"
+        class="sidebarButton"
+    >
+        Message Requests
+
+        <span id="requestBadge">
+            0
+        </span>
+
+    </button>
+
+
+    <button
+        type="button"
+        id="sidebarPrivateButton"
+        class="sidebarButton"
+    >
+        Private Messages
+    </button>
+
+
+    <button
+        type="button"
+        class="sidebarButton"
+        id="callbutton"
+    >
+        create call
+    </button>
+
+</div>
+
+
+<!-- =======================================================
+     MESSAGE REQUESTS
+     ======================================================= -->
+
+<div id="requestContainer">
+
+    <div id="requestTitle">
+        Message Requests
+    </div>
+
+
+    <button
+        type="button"
+        id="closeRequests"
+    >
+        Close
+    </button>
+
+
+    <div id="requestsList"></div>
+
+</div>
+
+
+<!-- =======================================================
+     PRIVATE CHAT
+     ======================================================= -->
+
+<div id="privateContainer">
+
+    <div id="privatePartner">
+        Private Chat
+    </div>
+
+
+    <button
+        type="button"
+        id="closePrivate"
+    >
+        Close
+    </button>
+
+
+    <div id="acceptedChatsList">
+
+        <div id="acceptedChatsTitle">
+            Contacts
+        </div>
+
+        <div id="acceptedChats"></div>
+
+    </div>
+
+
+    <div id="privateTop">
+
+        <input
+            id="privateUserId"
+            placeholder="Enter user's ID"
+        >
+
+
+        <button
+            type="button"
+            id="openPrivateChat"
+        >
+            Send Request
+        </button>
+
+    </div>
+
+
+    <div id="privateMessages"></div>
+
+
+    <div id="deleteChatArea">
+
+        <button
+            type="button"
+            id="deleteChatButton"
+        >
+            Delete Chat
+        </button>
+
+    </div>
+
+
+    <div id="privateInputArea">
+
+        <input
+            id="privateMessage"
+            placeholder="Private message..."
+        >
+
+
+        <button
+            type="button"
+            id="sendPrivate"
+        >
+            Send
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     CREATE CALL
+     ======================================================= -->
+
+<div id="createcallcontainer">
+
+    <div id="createcallwindow">
+
+        <button
+            type="button"
+            id="closeCreateCallButton"
+        >
+            Close
+        </button>
+
+
+        <div id="createCallControls">
+
+            <button
+                type="button"
+                id="createCallButton"
+                class="createCallButton"
+            >
+                Create Call
+            </button>
+
+
+            <input
+                type="text"
+                id="callNameInput"
+                class="callNameInput"
+                placeholder="Call name"
+                maxlength="50"
+            >
+
+        </div>
+
+
+        <div id="activeCallsContainer">
+
+            <h3>
+                Active Calls
+            </h3>
+
+
+            <div id="activeCallsList"></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     CALL WINDOW
+     ======================================================= -->
+
+<div id="callwindowcontainer">
+
+    <div id="callwindow">
+
+        <div id="callwindowheader">
+
+            <span id="callwindowtitle">
+                Call Window
+            </span>
+
+
+            <button
+                type="button"
+                id="closeCallWindowButton"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <div id="callVideoContainer">
+
+            <video
+                id="localVideo"
+                autoplay
+                playsinline
+                muted
+            ></video>
+
+
+            <div id="cameraUnavailable">
+                Camera unavailable
+            </div>
+
+        </div>
+
+
+        <div id="callStatus">
+            Connecting...
+        </div>
+
+
+        <div id="callControls">
+
+            <button
+                type="button"
+                id="toggleMicButton"
+            >
+                Microphone
+            </button>
+
+
+            <button
+                type="button"
+                id="toggleCameraButton"
+            >
+                Camera
+            </button>
+
+
+            <button
+                type="button"
+                id="leaveCallButton"
+            >
+                Leave Call
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     USER PROFILE POPUP
+     ======================================================= -->
+
+<div id="userProfileContainer">
+
+    <div id="userProfileWindow">
+
+        <button
+            type="button"
+            id="closeUserProfileButton"
+            class="closeUserProfileButton"
+        >
+            ×
+        </button>
+
+
+        <div id="userProfilePicture">
+            👤
+        </div>
+
+
+        <div id="userProfileName">
+            User
+        </div>
+
+
+        <div id="userProfileDescription">
+            No description.
+        </div>
+
+
+        <button
+            type="button"
+            id="sendProfileRequestButton"
+            class="sendProfileRequestButton"
+        >
+            Send Private Message Request
+        </button>
+
+    </div>
+
+</div>
+
+
+<!-- =======================================================
+     CLOUDFLARE INSIGHTS
+     ======================================================= -->
+
+<script
+    type="module"
+    src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495"
+    integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg=="
+    data-cf-beacon='{"version":"2024.11.0","token":"480c9d8468c44ad3bed3c74fbcc6d6f3","r":1,"spa":2}'
+    crossorigin="anonymous"
+></script>
+
+
+<!-- =======================================================
+     YOUR JAVASCRIPT
+     ======================================================= -->
+
+<script src="firebase.js"></script>
+
+<script src="usersystem.js"></script>
+
+<script src="privatemessages.js"></script>
+
+<script src="menustuff.js"></script>
+
+<script src="globalchat.js"></script>
+
+<script src="call.js"></script>
+
+<script src="game.js"></script>
+
+</body>
+
+</html>
